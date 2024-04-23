@@ -2,45 +2,124 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>WebGL - A05</title>
-<link type="text/css" href="style.css" rel="stylesheet" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>A5 - Quan Le</title>
+    <link type="text/css" href="style.css" rel="stylesheet" />
 </head>
 <body>
-<div class="description">
-Select one texture, one obj file, and one scene.
-</div>
-<div>
-    <input type="file" id="load_scene" multiple>
-</div>
-<div>
-	<canvas id="dummy_canvas" width="1" height="1"></canvas>
-</div> 
+    <div class="description">
+        Select one texture, and one scene.
+    </div>
+    <div>
+        <input type="file" id="load_scene" multiple>
+    </div>
+    <div style="display:flex">
+        <div>
+            <canvas id="rendering_canvas"></canvas>
+        </div>
 
-<canvas id="canvas"></canvas>
+        <div style="width:800px">
+            <div style="display: flex">
+                <canvas id="texture_canvas" width="1" height="1"></canvas>
+                <canvas id="mirror_canvas" width="1" height="1" style="transform:scale(-1, 1)"></canvas>
+            </div>
+            <div style="width: 100%;">
+                <div style="display:flex; margin-top:0px; margin-bottom:-25px;">
+                    <p align="center" style="width:30%">Amplitude: <span id="amplitudeLabelID"></span></p>
+                    <input type="range" id="amplitudeID" name="amplitude"
+                           value="1" min="0" max="2" step="0.01" style="width: 70%">
+                </div>
+                <div style="display:flex; margin-top:-25px; margin-bottom:-25px;">
+                    <p align="center" style="width: 30%">Wavelength: <span id="wavelengthLabelID"></span></p>
+                    <input type="range" id="wavelengthID" name="wavelength"
+                           value="2.5" min="0.01" max="5" step="0.01" style="width: 70%">
+                </div>
 
-<div class="wrapper">
-  <p align="center">
-  <input type="range" id="whID" name="pexp"
-         value="0.5" min="0.01" max="2.0" step="0.01" style="width:100%" >
-  <p align="center">Water height: <span id="whLabelID"></span></p>
-  </p>
-</div>
+                <div style="display:flex; margin-top:-25px; margin-bottom:0px;">
+                    <p align="center" style="width: 30%">Water Height: <span id="waterHeightLabelID"></span></p>
+                    <input type="range" id="waterHeightID" name="waterHeight"
+                           value="0.2" min="0.01" max="2" step="0.01" style="width: 70%">
+                </div>
 
+                <div style="display:flex; margin-top:-25px; margin-bottom:0px;">
+                    <p align="center" style="width: 30%">Wave Speed (unit/sec): <span id="speedLabelID"></span></p>
+                    <input type="range" id="speedID" name="speed"
+                           value="1" min="0" max="2" step="0.01" style="width: 70%">
+                </div>
+
+
+                <div style="display:flex; margin-top:10px; margin-bottom:5px;">
+                    <input align="center" style="width: 30%" type="checkbox" id="toShowDepthID" name="toShowDepth">
+                    <label style="width: 70%" for="toShowDepth">Check this box to show depth.</label>
+                </div>
+
+                <div style="display:flex; margin-top:5px; margin-bottom:10px;">
+                    <input align="center" style="width: 30%" type="checkbox" id="toUsePhongShadingID" name="toUsePhongShading" checked>
+                    <label style="width: 70%" for="toShowDepth">Check this box to use Phong shading. Otherwise, Gouraud shading is used.</label>
+                </div>
+
+                <div style="display:flex; margin-top:-10px; margin-bottom:-10px;">
+                    <p align="center" style="width: 30%">Phong Exponent: <span id="phongExpLabelID"></span></p>
+                    <input type="range" id="phongExpID" name="phongExp"
+                           value="50.0" min="0.01" max="100" step="0.01" style="width: 70%">
+                </div>
+
+                <div style="display: flex; margin-top: 0px; margin-bottom: -25px; ">
+                    <p align="center" style="width: 30%">Obj X: <span id="objXLabelID"></span></p>
+                    <input type="range" id="objXID" name="objX"
+                           value="0" min="-50" max="50" step="0.01" style="width: 70%">
+                </div>
+
+                <div style="display: flex; margin-top: -25px; margin-bottom: -25px; ">
+                    <p align="center" style="width: 30%">Obj Y: <span id="objYLabelID"></span></p>
+                    <input type="range" id="objYID" name="objY"
+                           value="0" min="-50" max="50" step="0.01" style="width: 70%">
+                </div>
+
+                <div style="display: flex; margin-top: -25px; margin-bottom: 0px; ">
+                    <p align="center" style="width: 30%">Obj Z: <span id="objZLabelID"></span></p>
+                    <input type="range" id="objZID" name="objZ"
+                           value="0" min="-50" max="50" step="0.01" style="width: 70%">
+                </div>
+
+                <div style="display:flex">
+                    <input align="center" style="width: 11%" type="checkbox" checked id="toEnableXRotID" name="toEnableXRot">
+                    <label style="width: 22%" for="toShowDepth">Enable X Rotation</label>
+                    <input align="center" style="width: 11%" type="checkbox" checked id="toEnableYRotID" name="toEnableYRot">
+                    <label style="width: 22%" for="toShowDepth">Enable Y Rotation</label>
+                    <input align="center" style="width: 11%" type="checkbox" checked id="toEnableZRotID" name="toEnableZRot">
+                    <label style="width: 22%" for="toShowDepth">Enable Z Rotation</label>
+                </div>
+
+                <div style="display: flex; margin-top: 0px; margin-bottom: -25px; ">
+                    <p align="center" style="width: 30%">X Rot Speed (deg/s): <span id="xRotSpeedLabelID"></span></p>
+                    <input type="range" id="xRotSpeedID" name="xRotSpeed"
+                           value="0" min="-360" max="360" step="0.01" style="width: 70%">
+                </div>
+
+                <div style="display: flex; margin-top: -25px; margin-bottom: -25px; ">
+                    <p align="center" style="width: 30%">Y Rot Speed (deg/s): <span id="yRotSpeedLabelID"></span></p>
+                    <input type="range" id="yRotSpeedID" name="yRotSpeed"
+                           value="0" min="-360" max="360" step="0.01" style="width: 70%">
+                </div>
+
+                <div style="display: flex; margin-top: -25px; margin-bottom: 0px; ">
+                    <p align="center" style="width: 30%">Z Rot Speed (deg/s): <span id="zRotSpeedLabelID"></span></p>
+                    <input type="range" id="zRotSpeedID" name="zRotSpeed"
+                           value="0" min="-360" max="360" step="0.01" style="width:70%">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="a05.js"></script>
+    <script type="text/javascript" src="m4.js"></script>
+    <script type="text/javascript" src="math.js"></script>
+    <script type="text/javascript" src="png.js"></script>
+    <script type="text/javascript" src="scene.js"></script>
+    <script type="text/javascript" src="sceneObjects.js"></script>
+    <script type="text/javascript" src="shaderProg.js"></script>
+    <script type="text/javascript" src="webgl-utils.js"></script>
 </body>
-<!--
-for most samples webgl-utils only provides shader compiling/linking and
-canvas resizing because why clutter the examples with code that's the same in every sample.
-See https://webglfundamentals.org/webgl/lessons/webgl-boilerplate.html
-and https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
-for webgl-utils, m3, m4, and webgl-lessons-ui.
--->
-<script src="webgl-utils.js"></script>
-<script src="m4.js"></script>
-<script src="a06.js"></script>
-<script type="text/javascript" src="png.js"></script>
 </html>
-
-
-
