@@ -35,7 +35,7 @@ The fragment shader does the following:
   * The camera is assumed to be located at infinity, so the ray exiting the water to reach the camera points directly upward.  
   * Given the exiting ray (in the air) and the normal at `I`, Snell's law is applied to calculate the incident ray (in the water).  
   * After processing the refractive effect, the intensity of the light is also modified depending on how much the light is refracted.  
-  * My implementation employs the method similar to Phong's shading and raise the cosine of the angle to some power for a more drastic effect.  
+  * My implementation employs the method similar to Phong's shading. In particular, I raise the cosine of the angle to some power for a more drastic effect.  
   * After light modification, the reflected ray is calculated.  
   * By using environmental mapping, the surrounding (determined by a skybox) is reflected onto the water surface.  
   * The reflection and refraction effects can be controlled by a slider.
