@@ -73,9 +73,9 @@ class Billboard {
         this.imageData = imageData;
     }
 
-    setProgram(webGLContext) {
+    setProgram(webGLContext, billboard, skyboxTextureDatas) {
         this.program = new BillboardProgram(webGLContext);
-        this.program.setBuffers(webGLContext, this);
+        this.program.setTextures(webGLContext, billboard, skyboxTextureDatas);
     }
 }
 

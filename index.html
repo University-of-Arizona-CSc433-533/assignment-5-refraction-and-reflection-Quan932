@@ -19,27 +19,42 @@
             <canvas id="rendering_canvas"></canvas>
         </div>
 
-        <div style="width:800px">
+        <div style="width:932px">
             <div style="display: flex">
                 <canvas id="texture_canvas" width="1" height="1"></canvas>
-                <canvas id="mirror_canvas" width="1" height="1" style="transform:scale(-1, 1)"></canvas>
+                <div style="width:532px">
+                    <div style="display: flex">
+                        <div style="width:133px"></div>
+                        <canvas id="top_canvas" width="1" height="1"></canvas>
+                    </div>
+                    <div style="display: flex">
+                        <canvas id="left_canvas" width="1" height="1"></canvas>
+                        <canvas id="front_canvas" width="1" height="1"></canvas>
+                        <canvas id="right_canvas" width="1" height="1"></canvas>
+                        <canvas id="back_canvas" width="1" height="1"></canvas>
+                    </div>
+                    <div style="display: flex">
+                        <div style="width:133px"></div>
+                        <canvas id="bottom_canvas" width="1" height="1"></canvas>
+                    </div>
+                </div>
             </div>
             <div style="width: 100%;">
                 <div style="display:flex; margin-top:0px; margin-bottom:-25px;">
                     <p align="center" style="width:30%">Amplitude: <span id="amplitudeLabelID"></span></p>
                     <input type="range" id="amplitudeID" name="amplitude"
-                           value="1" min="0" max="2" step="0.01" style="width: 70%">
+                           value="0.5" min="0" max="2" step="0.01" style="width: 70%">
                 </div>
                 <div style="display:flex; margin-top:-25px; margin-bottom:-25px;">
                     <p align="center" style="width: 30%">Wavelength: <span id="wavelengthLabelID"></span></p>
                     <input type="range" id="wavelengthID" name="wavelength"
-                           value="2.5" min="0.01" max="5" step="0.01" style="width: 70%">
+                           value="3" min="0.01" max="5" step="0.01" style="width: 70%">
                 </div>
 
                 <div style="display:flex; margin-top:-25px; margin-bottom:0px;">
                     <p align="center" style="width: 30%">Water Height: <span id="waterHeightLabelID"></span></p>
                     <input type="range" id="waterHeightID" name="waterHeight"
-                           value="0.2" min="0.01" max="2" step="0.01" style="width: 70%">
+                           value="1" min="0.01" max="8" step="0.01" style="width: 70%">
                 </div>
 
                 <div style="display:flex; margin-top:-25px; margin-bottom:0px;">
@@ -48,66 +63,21 @@
                            value="1" min="0" max="2" step="0.01" style="width: 70%">
                 </div>
 
+                <div style="display:flex; margin-top:-25px; margin-bottom:0px;">
+                    <p align="center" style="width: 30%">Light Adjustment Exponent: <span id="lightAdjustmentExpLabelID"></span></p>
+                    <input type="range" id="lightAdjustmentExpID" name="lightAdjustmentExp"
+                           value="2" min="0" max="5" step="0.01" style="width: 70%">
+                </div>
+
+                <div style="display:flex; margin-top:-25px; margin-bottom:0px;">
+                    <p align="center" style="width: 30%">Reflected to Refracted Ratio: <span id="reflectToRefractLabelID"></span></p>
+                    <input type="range" id="reflectToRefractID" name="reflectToRefract"
+                           value="0.5" min="0" max="1" step="0.01" style="width: 70%">
+                </div>
 
                 <div style="display:flex; margin-top:10px; margin-bottom:5px;">
-                    <input align="center" style="width: 30%" type="checkbox" id="toShowDepthID" name="toShowDepth">
-                    <label style="width: 70%" for="toShowDepth">Check this box to show depth.</label>
-                </div>
-
-                <div style="display:flex; margin-top:5px; margin-bottom:10px;">
-                    <input align="center" style="width: 30%" type="checkbox" id="toUsePhongShadingID" name="toUsePhongShading" checked>
-                    <label style="width: 70%" for="toShowDepth">Check this box to use Phong shading. Otherwise, Gouraud shading is used.</label>
-                </div>
-
-                <div style="display:flex; margin-top:-10px; margin-bottom:-10px;">
-                    <p align="center" style="width: 30%">Phong Exponent: <span id="phongExpLabelID"></span></p>
-                    <input type="range" id="phongExpID" name="phongExp"
-                           value="50.0" min="0.01" max="100" step="0.01" style="width: 70%">
-                </div>
-
-                <div style="display: flex; margin-top: 0px; margin-bottom: -25px; ">
-                    <p align="center" style="width: 30%">Obj X: <span id="objXLabelID"></span></p>
-                    <input type="range" id="objXID" name="objX"
-                           value="0" min="-50" max="50" step="0.01" style="width: 70%">
-                </div>
-
-                <div style="display: flex; margin-top: -25px; margin-bottom: -25px; ">
-                    <p align="center" style="width: 30%">Obj Y: <span id="objYLabelID"></span></p>
-                    <input type="range" id="objYID" name="objY"
-                           value="0" min="-50" max="50" step="0.01" style="width: 70%">
-                </div>
-
-                <div style="display: flex; margin-top: -25px; margin-bottom: 0px; ">
-                    <p align="center" style="width: 30%">Obj Z: <span id="objZLabelID"></span></p>
-                    <input type="range" id="objZID" name="objZ"
-                           value="0" min="-50" max="50" step="0.01" style="width: 70%">
-                </div>
-
-                <div style="display:flex">
-                    <input align="center" style="width: 11%" type="checkbox" checked id="toEnableXRotID" name="toEnableXRot">
-                    <label style="width: 22%" for="toShowDepth">Enable X Rotation</label>
-                    <input align="center" style="width: 11%" type="checkbox" checked id="toEnableYRotID" name="toEnableYRot">
-                    <label style="width: 22%" for="toShowDepth">Enable Y Rotation</label>
-                    <input align="center" style="width: 11%" type="checkbox" checked id="toEnableZRotID" name="toEnableZRot">
-                    <label style="width: 22%" for="toShowDepth">Enable Z Rotation</label>
-                </div>
-
-                <div style="display: flex; margin-top: 0px; margin-bottom: -25px; ">
-                    <p align="center" style="width: 30%">X Rot Speed (deg/s): <span id="xRotSpeedLabelID"></span></p>
-                    <input type="range" id="xRotSpeedID" name="xRotSpeed"
-                           value="0" min="-360" max="360" step="0.01" style="width: 70%">
-                </div>
-
-                <div style="display: flex; margin-top: -25px; margin-bottom: -25px; ">
-                    <p align="center" style="width: 30%">Y Rot Speed (deg/s): <span id="yRotSpeedLabelID"></span></p>
-                    <input type="range" id="yRotSpeedID" name="yRotSpeed"
-                           value="0" min="-360" max="360" step="0.01" style="width: 70%">
-                </div>
-
-                <div style="display: flex; margin-top: -25px; margin-bottom: 0px; ">
-                    <p align="center" style="width: 30%">Z Rot Speed (deg/s): <span id="zRotSpeedLabelID"></span></p>
-                    <input type="range" id="zRotSpeedID" name="zRotSpeed"
-                           value="0" min="-360" max="360" step="0.01" style="width:70%">
+                    <input align="center" style="width: 30%" type="checkbox" checked id="toEnableAnimationID" name="toEnableAnimation">
+                    <label style="width: 70%" for="toShowDepth">Enable Animation</label>
                 </div>
             </div>
         </div>

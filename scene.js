@@ -1,9 +1,8 @@
 /**
  * Scene object contains the following main components:
- * ---- Camera and Mirrored Camera
+ * ---- Camera
+ * ---- Water Surface
  * ---- Billboard
- * ---- Mirror
- * ---- OBJ Model
  */
 class Scene {
     constructor(sceneDataJSON) {
@@ -12,6 +11,10 @@ class Scene {
         // Init metadata
         this.sun = Vector3.fromArray(sceneData.SunLocation);
         this.defaultColor = Vector3.fromArray(sceneData.DefaultColor);
+
+        if (sceneData.waterSurface != null) {
+            this.waterSurface = new Billboard(sceneData.waterSurface);
+        }
 
         if (sceneData.billboard != null) {
             this.billboard = new Billboard(sceneData.billboard);

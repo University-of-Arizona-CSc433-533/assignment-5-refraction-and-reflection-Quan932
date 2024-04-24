@@ -22,12 +22,35 @@ var textureCtx = texture_canvas.getContext("2d", { willReadFrequently: true });
 var rendering_canvas = document.querySelector("#rendering_canvas");
 var webGLContext = rendering_canvas.getContext("webgl", { preserveDrawingBuffer: true });
 
+var right_canvas = document.querySelector("#right_canvas");
+var rightCtx = right_canvas.getContext("2d", { willReadFrequently: true });
+var left_canvas = document.querySelector("#left_canvas");
+var leftCtx = left_canvas.getContext("2d", { willReadFrequently: true });
+var top_canvas = document.querySelector("#top_canvas");
+var topCtx = top_canvas.getContext("2d", { willReadFrequently: true });
+var bottom_canvas = document.querySelector("#bottom_canvas");
+var bottomCtx = bottom_canvas.getContext("2d", { willReadFrequently: true });
+var back_canvas = document.querySelector("#back_canvas");
+var backCtx = back_canvas.getContext("2d", { willReadFrequently: true });
+var front_canvas = document.querySelector("#front_canvas");
+var frontCtx = front_canvas.getContext("2d", { willReadFrequently: true });
+
 var scene;
 var allImgs = new Array(0);
+var skyboxTextureDatas = [
+    { target: webGLContext.TEXTURE_CUBE_MAP_POSITIVE_X, fn: "skybox_right.png", canvas: right_canvas, ctx: rightCtx, imageData: null },
+    { target: webGLContext.TEXTURE_CUBE_MAP_NEGATIVE_X, fn: "skybox_left.png", canvas: left_canvas, ctx: leftCtx, imageData: null },
+    { target: webGLContext.TEXTURE_CUBE_MAP_POSITIVE_Y, fn: "skybox_top.png", canvas: top_canvas, ctx: topCtx, imageData: null },
+    { target: webGLContext.TEXTURE_CUBE_MAP_NEGATIVE_Y, fn: "skybox_bottom.png", canvas: bottom_canvas, ctx: bottomCtx, imageData: null },
+    { target: webGLContext.TEXTURE_CUBE_MAP_POSITIVE_Z, fn: "skybox_front.png", canvas: front_canvas, ctx: frontCtx, imageData: null },
+    { target: webGLContext.TEXTURE_CUBE_MAP_NEGATIVE_Z, fn: "skybox_back.png", canvas: back_canvas, ctx: backCtx, imageData: null },
+];
 
 var isReadyArray;
 var isReadyToRender = false;
 var hasFinishedProgramming = false;
+var prevTimestamp = null;
+var elapsedTime = null;
 
 var amplitudeElem = document.getElementById('amplitudeID');
 var amplitudeLabelElem = document.getElementById('amplitudeLabelID');
@@ -37,6 +60,11 @@ var waterHeightElem = document.getElementById('waterHeightID');
 var waterHeightLabelElem = document.getElementById('waterHeightLabelID');
 var speedElem = document.getElementById('speedID');
 var speedLabelElem = document.getElementById('speedLabelID');
+var lightAdjustmentExpElem = document.getElementById('lightAdjustmentExpID');
+var lightAdjustmentExpLabelElem = document.getElementById('lightAdjustmentExpLabelID');
+var reflectToRefractElem = document.getElementById('reflectToRefractID');
+var reflectToRefractLabelElem = document.getElementById('reflectToRefractLabelID');
+var toEnableAnimationElem = document.getElementById('toEnableAnimationID');
 
 // Call the rendering loop immediately to update the sliders even when no files are uploaded.
 setTimeout(function () { requestAnimationFrame(renderingLoop) }, 10);
@@ -96,7 +124,7 @@ function createReaderOnLoadHandler(file, i) {
                 let img = SceneImage.getImageFromPNG(png, fileName); // Init PNG image
                 allImgs.push(img);
 
-                populateTextureCanvas(img);
+                populateCanvas(img, fileName);
                 isReadyArray[i] = true;
             });
         }
@@ -104,37 +132,43 @@ function createReaderOnLoadHandler(file, i) {
 }
 
 /**
- * Draw the texture image onto the texture canvas.
+ * Draw the textures (skybox + picture) onto the texture canvas.
  */
-function populateTextureCanvas(img) {
-    texture_canvas.setAttribute("width", img.width);
-    texture_canvas.setAttribute("height", img.height);
+function populateCanvas(img, fileName) {
+    var curCanvas = texture_canvas;
+    var curCtx = textureCtx;
 
-    let imgData = textureCtx.createImageData(img.width, img.height);
+    var curSkyboxTextureData = null;
+    for (var i = 0; i < skyboxTextureDatas.length; i++) {
+        var skyboxTextureData = skyboxTextureDatas[i];
+        if (fileName == skyboxTextureData.fn) {
+            curCanvas = skyboxTextureData.canvas;
+            curCtx = skyboxTextureData.ctx;
+            curSkyboxTextureData = skyboxTextureData;
+            break;
+        }
+    }
+
+    curCanvas.setAttribute("width", img.width);
+    curCanvas.setAttribute("height", img.height);
+
+    let imgData = curCtx.createImageData(img.width, img.height);
 
     for (var i = 0; i < img.data.length; i += 4) {
         for (var colorChannel = 0; colorChannel < 4; colorChannel++) {
             imgData.data[i + colorChannel] = img.data[i + colorChannel];
         }
     }
-    textureCtx.putImageData(imgData, texture_canvas.width / 2 - img.width / 2, texture_canvas.height / 2 - img.height / 2);
+    curCtx.putImageData(imgData, curCanvas.width / 2 - img.width / 2, curCanvas.height / 2 - img.height / 2);
+
+    if (curSkyboxTextureData != null) {
+        curSkyboxTextureData.imageData = imgData;
+    }
 }
 
-/**
- * Set up the sliders to match the values specified in the Scene JSON file.
- */
 function initConfigurations() {
-    // camXElem.value = scene.ogCam.eye.x;
-    // camYElem.value = scene.ogCam.eye.y;
-    // camZElem.value = scene.ogCam.eye.z;
-    // 
-    // objXElem.value = scene.objModel.position.x;
-    // objYElem.value = scene.objModel.position.y;
-    // objZElem.value = scene.objModel.position.z;
-    // 
-    // xRotSpeedElem.value = 0;
-    // yRotSpeedElem.value = 90;
-    // zRotSpeedElem.value = 0;
+    waterHeightElem.value = scene.waterSurface.center.y - scene.billboard.center.y;
+    waterHeightLabelElem.innerHTML = waterHeightElem.value;
 }
 
 /**
@@ -145,13 +179,8 @@ function updateConfigurations() {
     wavelengthLabelElem.innerHTML = wavelengthElem.value;
     waterHeightLabelElem.innerHTML = waterHeightElem.value;
     speedLabelElem.innerHTML = speedElem.value;
-    // phongExpLabelElem.innerHTML = phongExpElem.value;
-    // objXLabelElem.innerHTML = objXElem.value;
-    // objYLabelElem.innerHTML = objYElem.value;
-    // objZLabelElem.innerHTML = objZElem.value;
-    // xRotSpeedLabelElem.innerHTML = xRotSpeedElem.value;
-    // yRotSpeedLabelElem.innerHTML = yRotSpeedElem.value;
-    // zRotSpeedLabelElem.innerHTML = zRotSpeedElem.value;
+    lightAdjustmentExpLabelElem.innerHTML = lightAdjustmentExpElem.value;
+    reflectToRefractLabelElem.innerHTML = reflectToRefractElem.value;
 }
 
 /**
@@ -200,49 +229,55 @@ function renderingLoop(curTimestamp) {
  */
 function programAll() {
     scene.billboard.setImageData(textureCtx.getImageData(0, 0, texture_canvas.width, texture_canvas.height));
-    scene.billboard.setProgram(webGLContext);
+    scene.waterSurface.setProgram(webGLContext, scene.billboard, skyboxTextureDatas);
 }
 
 /**
  * Render the scene.
  */
 function renderAll(curTimestamp) {
-    // scene.ogCam.updateEye(Number(camXElem.value), Number(camYElem.value), Number(camZElem.value));
-
     // Clear the canvas to draw the new scene for the current frame.
     webGLContext.clearColor(scene.defaultColor.x, scene.defaultColor.y, scene.defaultColor.z, 1.0);
     webGLContext.clear(webGLContext.COLOR_BUFFER_BIT | webGLContext.DEPTH_BUFFER_BIT);
     webGLContext.viewport(0, 0, webGLContext.canvas.width, webGLContext.canvas.height);
     webglUtils.resizeCanvasToDisplaySize(webGLContext.canvas);
 
-    renderBillboard(curTimestamp);
+    if (toEnableAnimationElem.checked) {
+        if (elapsedTime == null) {
+            elapsedTime = 0;
+        }
+        else {
+            elapsedTime += (curTimestamp - prevTimestamp) / 1000;
+        }
+        
+    }
+    prevTimestamp = curTimestamp;
+
+    renderWaterSurface();
 }
 
-var test = 0;
 /**
- * Render the Billboard, which simply shows the texture.
- * No shading is done on the Billboard.
- * The :toFlip: argument helps with rendering the mirrored view during 1st pass.
+ * Render the surface of the water
  */
-function renderBillboard(curTimestamp) {
+function renderWaterSurface() {
     webGLContext.enable(webGLContext.CULL_FACE);
     webGLContext.enable(webGLContext.DEPTH_TEST);
 
     var waterHeight = Number(waterHeightElem.value);
     var positions = new Float32Array([
         // Triangle 1
-        scene.billboard.A.x, scene.billboard.A.y + waterHeight, scene.billboard.A.z,
-        scene.billboard.D.x, scene.billboard.D.y + waterHeight, scene.billboard.D.z,
-        scene.billboard.B.x, scene.billboard.B.y + waterHeight, scene.billboard.B.z,
+        scene.waterSurface.A.x, scene.billboard.center.y + waterHeight, scene.waterSurface.A.z,
+        scene.waterSurface.D.x, scene.billboard.center.y + waterHeight, scene.waterSurface.D.z,
+        scene.waterSurface.B.x, scene.billboard.center.y + waterHeight, scene.waterSurface.B.z,
         // Triangle 2
-        scene.billboard.B.x, scene.billboard.B.y + waterHeight, scene.billboard.B.z,
-        scene.billboard.D.x, scene.billboard.D.y + waterHeight, scene.billboard.D.z,
-        scene.billboard.C.x, scene.billboard.C.y + waterHeight, scene.billboard.C.z
+        scene.waterSurface.B.x, scene.billboard.center.y + waterHeight, scene.waterSurface.B.z,
+        scene.waterSurface.D.x, scene.billboard.center.y + waterHeight, scene.waterSurface.D.z,
+        scene.waterSurface.C.x, scene.billboard.center.y + waterHeight, scene.waterSurface.C.z
     ]);
-    scene.billboard.program.setPositionBuffer(webGLContext, positions);
+    scene.waterSurface.program.setPositionBuffer(webGLContext, positions);
 
-    webGLContext.useProgram(scene.billboard.program.program);
-    scene.billboard.program.sendBufferData(webGLContext);
+    webGLContext.useProgram(scene.waterSurface.program.program);
+    scene.waterSurface.program.sendBufferData(webGLContext);
 
     // CAMERA MATRIX: Cam-coords -> World-coords
     var cameraMatrix = m4.lookAt(
@@ -258,44 +293,43 @@ function renderBillboard(curTimestamp) {
     var objToClipMatrix = m4.multiply(projectionMatrix, viewMatrix);
 
     // TEXTURE
-    var texture = webGLContext.createTexture();
-    webGLContext.activeTexture(webGLContext.TEXTURE0);
-    webGLContext.bindTexture(webGLContext.TEXTURE_2D, texture);
-    webGLContext.texImage2D(
-        webGLContext.TEXTURE_2D, 0, webGLContext.RGBA, webGLContext.RGBA, webGLContext.UNSIGNED_BYTE,
-        scene.billboard.imageData);
-    webGLContext.generateMipmap(webGLContext.TEXTURE_2D); // Only applies to 2^n x 2^n textures.
-    webGLContext.uniform1i(scene.billboard.program.u_texture, 0);
+    webGLContext.uniform1i(scene.waterSurface.program.u_texture, 0);
+    // SKYBOX
+    webGLContext.uniform1i(scene.waterSurface.program.u_skybox, 1);
 
     // CENTER
     webGLContext.uniform3fv(
-        scene.billboard.program.u_center,
-        new Float32Array([scene.billboard.center.x, scene.billboard.center.y + waterHeight, scene.billboard.center.z]));
+        scene.waterSurface.program.u_center,
+        new Float32Array([scene.waterSurface.center.x, scene.billboard.center.y + waterHeight, scene.waterSurface.center.z]));
     // X MAX
-    webGLContext.uniform1f(scene.billboard.program.u_xMax, scene.billboard.B.x);
+    webGLContext.uniform1f(scene.waterSurface.program.u_xMax, scene.billboard.B.x);
     // DEFAULT COLOR
     webGLContext.uniform4fv(
-        scene.billboard.program.u_defaultColor,
+        scene.waterSurface.program.u_defaultColor,
         new Float32Array([scene.defaultColor.x, scene.defaultColor.y, scene.defaultColor.z, 1]));
+    // REFLECTED TO REFRACTED
+    webGLContext.uniform1f(scene.waterSurface.program.u_reflectToRefract, Number(reflectToRefractElem.value));
 
     // N AIR
-    webGLContext.uniform1f(scene.billboard.program.u_nAir, 1);
+    webGLContext.uniform1f(scene.waterSurface.program.u_nAir, 1);
     // N WATER
-    webGLContext.uniform1f(scene.billboard.program.u_nWater, 2);
+    webGLContext.uniform1f(scene.waterSurface.program.u_nWater, 2);
 
     // AMPLITUDE
-    webGLContext.uniform1f(scene.billboard.program.u_amplitude, Number(amplitudeElem.value));
+    webGLContext.uniform1f(scene.waterSurface.program.u_amplitude, Number(amplitudeElem.value));
     // SPEED
-    webGLContext.uniform1f(scene.billboard.program.u_speed, Number(speedElem.value));
+    webGLContext.uniform1f(scene.waterSurface.program.u_speed, Number(speedElem.value));
     // TIME
-    webGLContext.uniform1f(scene.billboard.program.u_time, curTimestamp / 1000);
+    webGLContext.uniform1f(scene.waterSurface.program.u_time, elapsedTime);
     // WAVELENGTH
-    webGLContext.uniform1f(scene.billboard.program.u_wavelength, Number(wavelengthElem.value));
+    webGLContext.uniform1f(scene.waterSurface.program.u_wavelength, Number(wavelengthElem.value));
     // WATER HEIGHT
-    webGLContext.uniform1f(scene.billboard.program.u_waterHeight, waterHeight);
+    webGLContext.uniform1f(scene.waterSurface.program.u_waterHeight, waterHeight);
+    // LIGHT ADJUSTMENT EXPONENT
+    webGLContext.uniform1f(scene.waterSurface.program.u_lightAdjustmentExp, Number(lightAdjustmentExpElem.value));
 
     // WORLD VIEW PROJECTION
-    webGLContext.uniformMatrix4fv(scene.billboard.program.u_objToClipMatrix, false, objToClipMatrix);
+    webGLContext.uniformMatrix4fv(scene.waterSurface.program.u_objToClipMatrix, false, objToClipMatrix);
 
     webGLContext.drawArrays(webGLContext.TRIANGLES, 0, 6);
 }

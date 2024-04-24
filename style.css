@@ -14,6 +14,15 @@ body {
     font-family: Sans-Serif;
 }
 
+#right_canvas, #left_canvas, #top_canvas, #bottom_canvas, #back_canvas, #front_canvas {
+    background-color: #fff;
+    border: 1px solid black;
+    /* NOTE: This size is changed if in iframe - see below '.iframe canvas' */
+    width: 133px;
+    height: 133px;
+    display: block;
+}
+
 #texture_canvas {
     background-color: #fff;
     border: 1px solid black;
