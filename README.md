@@ -10,7 +10,7 @@ Date: April 23, 2024
   * `materials/f-texture.png`  
   * `materials/test_scene.json`  
   * `materials/skybox_*.png`  
-3. [Optional] Play around with the sliders and checkbox.
+4. [Optional] Play around with the sliders and checkbox.
 
 # Implementation Description
 
