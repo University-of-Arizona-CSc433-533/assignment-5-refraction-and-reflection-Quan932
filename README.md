@@ -77,6 +77,7 @@ I added a slider to control the `Reflected to Refracted Ratio`. I included two s
 
 * `materials/clouds/` -- The folder including the scene required files and a skybox featuring clouds.
 * `materials/scenic/` -- The folder including the scene required files and a skybox featuring a nice scene.
+* `materials/spectrum/` -- The folder including the scene required files and a skybox featuring colors.
 * `outputs/Demo.mp4` -- A demo video that shows how the scene is rendered.
 * `a05.js` -- JavaScript file containing the core logic.
 * `index.html` -- File to run the program.
