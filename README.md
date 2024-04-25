@@ -5,7 +5,7 @@ Date: April 23, 2024
 # How to Execute the Program
 
 1. Open `index.html` in a browser.  
-2. Go into one of the two folders: `materials/clouds` or `materials/scenic`  
+2. Go into one of the 3 folders: `materials/clouds`, `materials/scenic`, or `materials/spectrum`  
 3. Upload the all 8 files in that folder:  
   * `materials/f-texture.png`  
   * `materials/test_scene.json`  
@@ -63,6 +63,9 @@ The higher the exponent, the more contrast there is between parts of the wave.
 The `Reflected to Refracted Ratio` slider controls how much of the light is reflected or refracted.  
 If this slider is set to `0`, then only refraction can be seen.  
 If it is set to `1`, then only reflection can be seen.
+
+The `Water Index` slider controls the refractive index of the water.  
+The refractive index of the air is always `1`.
 
 The `Enable Animation` checkbox allows the user to pause or play the animation as they want.
 

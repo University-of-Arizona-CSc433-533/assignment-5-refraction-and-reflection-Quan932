@@ -64,6 +64,8 @@ var lightAdjustmentExpElem = document.getElementById('lightAdjustmentExpID');
 var lightAdjustmentExpLabelElem = document.getElementById('lightAdjustmentExpLabelID');
 var reflectToRefractElem = document.getElementById('reflectToRefractID');
 var reflectToRefractLabelElem = document.getElementById('reflectToRefractLabelID');
+var waterIndexElem = document.getElementById('waterIndexID');
+var waterIndexLabelElem = document.getElementById('waterIndexLabelID');
 var toEnableAnimationElem = document.getElementById('toEnableAnimationID');
 
 // Call the rendering loop immediately to update the sliders even when no files are uploaded.
@@ -181,6 +183,7 @@ function updateConfigurations() {
     speedLabelElem.innerHTML = speedElem.value;
     lightAdjustmentExpLabelElem.innerHTML = lightAdjustmentExpElem.value;
     reflectToRefractLabelElem.innerHTML = reflectToRefractElem.value;
+    waterIndexLabelElem.innerHTML = waterIndexElem.value;
 }
 
 /**
@@ -313,7 +316,7 @@ function renderWaterSurface() {
     // N AIR
     webGLContext.uniform1f(scene.waterSurface.program.u_nAir, 1);
     // N WATER
-    webGLContext.uniform1f(scene.waterSurface.program.u_nWater, 2);
+    webGLContext.uniform1f(scene.waterSurface.program.u_nWater, Number(waterIndexElem.value));
 
     // AMPLITUDE
     webGLContext.uniform1f(scene.waterSurface.program.u_amplitude, Number(amplitudeElem.value));
